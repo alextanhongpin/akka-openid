@@ -31,7 +31,7 @@ object AkkaHttpHelloWorld extends HealthJsonSupport {
     val port = 8080
 
     def main(args: Array[String]): Unit = {
-        implicit val system = ActorSystem()
+        implicit val system = ActorSystem("my-system")
         implicit val materializer = ActorMaterializer()
         // needed for the future flatMap/onComplete in the end
         implicit val executionContext = system.dispatcher
@@ -67,13 +67,13 @@ object AkkaHttpHelloWorld extends HealthJsonSupport {
 
         // Startup, and listen for requests
         val bindingFuture = Http().bindAndHandle(route, host, port)
-        println("listening to port *:8080. press ctrl + c to cancel")
+        println("listening to port *:8080. press Return to cancel")
         StdIn.readLine() // let it run until user presses return
 
         // Shutdown
         bindingFuture
             .flatMap(_.unbind()) // Trigger unbinding from the port
-            // .onComplete(_ => system.terminate()) // and shutdown when done
+            .onComplete(_ => system.terminate()) // and shutdown when done
         // system.terminate()
     }
 }
