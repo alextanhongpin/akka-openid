@@ -11,6 +11,7 @@ import reactivemongo.api.commands.MultiBulkWriteResult
 import reactivemongo.api.collection.bson.BSONCollection
 import reactivemongo.api.QueryOpts
 
+import com.typesafe.config.ConfigFactory
 
 case class Person(name: String, age: Int)
 
@@ -20,7 +21,8 @@ case class Person(name: String, age: Int)
 // val conOpts = MongoConnectionOptions(readPreference = "primary")
 // val connection3 = driver1.connection(List("localhost"), options = conOpts)
 
-val mongoURI = "mongodb://localhost:27017/akka-openid"
+
+val mongoURI = ConfigFactory.load().getStringList("mongodb.servers").toList(0)
 val driver = new MongoDriver
 
 val database = for {
@@ -37,7 +39,8 @@ database.onComplete {
 }
 
 def dbFromConnection(connection: MongoConnection): Future[BSONCollection] =
-    connection.database("akka-openid").
+    val db = ConfigFactory.load().getString("mongodb.db")
+    connection.database(db).
         map(_.collection("some-collection"))
 
 // Write documents

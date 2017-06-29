@@ -7,20 +7,26 @@ import reactivemongo.bson.{
     BSONDocumentWriter, BSONDocumentReader, Macros, document
 }
 import reactivemongo.api.collections.bson.BSONCollection
+import com.typesafe.config.ConfigFactory
+// Required for getStringList in the config factory
+import collection.JavaConversions._
 
 trait HealthRepo {
-    val mongoUri = "mongodb://localhost:27017"
+    val mongoURIs = ConfigFactory.load().getStringList("mongodb.servers").toList
+    // val mongoUri = "mongodb://localhost:27017"
+    println("Got mongoURI =>" + mongoURIs)
 
     import ExecutionContext.Implicits.global
 
     // Connect to the database. Must be done once per application
     val driver = new MongoDriver
-    val parsedURI = MongoConnection.parseURI(mongoUri)
+    val parsedURI = MongoConnection.parseURI(mongoURIs(0))
     val connection = parsedURI.map(driver.connection(_))
 
     // Database and collections: Get references
     val futureConnection = Future.fromTry(connection)
-    def db1: Future[DefaultDB] = futureConnection.flatMap(_.database("akka-openid"))
+    val dbName = ConfigFactory.load().getString("mongodb.db")
+    def db1: Future[DefaultDB] = futureConnection.flatMap(_.database(dbName))
     // def db2: Future[DefaultDB] = futureConnection.flatMap(_.database("anotherdb"))
     def personCollection = db1.map(_.collection("person"))
 
