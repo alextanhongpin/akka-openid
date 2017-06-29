@@ -50,16 +50,16 @@ trait HealthRepo {
         personCollection.flatMap(_.find(document("age" -> age)).
             cursor[Person]().collect[List]()) // Collect usng the result cursor
 
-    val person = findPersonByAge(1).onComplete {
+    /*val person = findPersonByAge(1).onComplete {
         case Failure(e) => e.printStackTrace()
         case Success(writeResult) =>
             println(s"successfully get document with result: $writeResult")
-    }
+    }*/
     // person.map(_ => println)
     // Custom persistent type
     case class Person(firstName: String, lastName: String, age: Int)
 }
 
 
-object AkkaHttpHelloWorld extends App with HealthRepo {}
+// object AkkaHttpHelloWorld extends App with HealthRepo {}
  

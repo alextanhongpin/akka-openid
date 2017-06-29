@@ -1,4 +1,4 @@
-package com.alextanhongpin.akkahttp
+package com.alextanhongpin.app
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl._
@@ -17,15 +17,17 @@ import spray.json.DefaultJsonProtocol._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.concurrent.duration._ // For the .seconds
 import scala.io.StdIn
+import scala.util.{Failure, Success}
 
 import com.alextanhongpin.route._
-// import com.alextanhongpin.db._
+import com.alextanhongpin.db._
 
 
 trait HealthJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val healthFormat = jsonFormat2(Health)
 }
-trait HealthService extends HealthJsonSupport {
+
+trait HealthService extends HealthJsonSupport with HealthRepo {
     // implicit val system: ActorSystem
     // implicit val materializer: ActorMaterializer
     // needed for the future flatMap/onComplete in the end
@@ -46,7 +48,7 @@ trait HealthService extends HealthJsonSupport {
                     case _ =>
                         complete(StatusCodes.InternalServerError)
                 }
-            }
+            } ~
             post {
                 implicit val timeout: Timeout = 5.seconds
                 entity(as[Health]) { statusReport => 
@@ -61,13 +63,19 @@ trait HealthService extends HealthJsonSupport {
         }
     }
 
+    val person = findPersonByAge(1).onComplete {
+        case Failure(e) => e.printStackTrace()
+        case Success(writeResult) =>
+            println(s"successfully get document with result: $writeResult")
+    }
+
 }
 // https://spindance.com/reactive-rest-services-akka-http/
-object AkkaHttpHelloWorld extends App with HealthService {
+object AkkaHttpHelloWorld extends HealthService {
     val host = "localhost"
     val port = 8080
 
-    // def main(args: Array[String]): Unit = {
+    def main(args: Array[String]): Unit = {
         // override implicit val system = ActorSystem("my-system")
         // override implicit val materializer = ActorMaterializer()
         // needed for the future flatMap/onComplete in the end
@@ -82,6 +90,6 @@ object AkkaHttpHelloWorld extends App with HealthService {
             .flatMap(_.unbind()) // Trigger unbinding from the port
             .onComplete(_ => system.terminate()) // and shutdown when done
         // system.terminate()
-    // }
+    }
 }
  
