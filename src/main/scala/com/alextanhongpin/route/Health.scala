@@ -16,7 +16,7 @@ case object GetHealthRequest
 case class SetStatusRequest(health: Health)
 case class HealthResponse(health: Health)
  
-class RequestHandler extends Actor with ActorLogging{
+class RequestHandler extends Actor with ActorLogging {
  
   var status: Health = Health("Healthy","Initialized")
  

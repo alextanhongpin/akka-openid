@@ -1,13 +1,14 @@
-package com.alextanhongpin.app
+// Main.scala is the main for our application. It handles routing and initialization of our services.
 
+package com.alextanhongpin
 
 import akka.http.scaladsl.Http
 
 import scala.io.StdIn
 import scala.util.{Failure, Success}
 
-// Import all services
 import com.alextanhongpin.service._
+import com.alextanhongpin.app._
 
 // https://spindance.com/reactive-rest-services-akka-http/
 // FooRouter.scala
@@ -23,7 +24,6 @@ import com.alextanhongpin.service._
 // object MainRouter {
 //    val routes = FooRouter.route ~ BarRouter.route
 // }
-
 
 object AkkaHttpHelloWorld extends HealthService {
     val host = "localhost"
